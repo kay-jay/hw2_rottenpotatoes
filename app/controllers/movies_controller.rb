@@ -8,13 +8,27 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie.all_ratings
-    if(params.has_key?(:ratings))
+    if params.has_key? :ratings
       where = "rating in ('#{params[:ratings].keys.join("','")}')"
+      session[:ratings] = params[:ratings]
     else
-      params[:ratings] = {}
+      if session.has_key? :ratings
+        params[:ratings] = session[:ratings]
+        flash.keep
+        redirect_to movies_path(params) and return
+      else
+        params[:ratings] = {}
+      end
     end
-    if(params.has_key?(:sort))
+    if params.has_key? :sort 
       order = "#{params[:sort]}"
+      session[:sort] = params[:sort]
+    else
+      if session.has_key? :sort
+        params[:sort] = session[:sort]
+        flash.keep
+        redirect_to movies_path(params) and return
+      end
     end
     @movies = Movie.where(where).order(order).all
   end
